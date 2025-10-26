@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { User, ChatRoom, PrivateChat } from '../types';
 import { PlusIcon, UsersIcon, VerifiedIcon, UserPlusIcon, XIcon, ChevronDownIcon, ChevronRightIcon } from './icons';
+import { subscribeToOnlineStatus, getOnlineUsers } from '../services/presenceService';
 
 // 房间图标映射
 const ROOM_ICONS: { [key: string]: string } = {
@@ -204,6 +205,16 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
   const [isUserRoomsExpanded, setIsUserRoomsExpanded] = useState(true);
   const [isOfficialRoomsExpanded, setIsOfficialRoomsExpanded] = useState(true);
   const [genderFilter, setGenderFilter] = useState<'All' | 'Male' | 'Female'>('All');
+  const [realtimeOnlineCount, setRealtimeOnlineCount] = useState<number>(0);
+
+  // 订阅实时在线状态
+  useEffect(() => {
+    const unsubscribe = subscribeToOnlineStatus((onlineUsers) => {
+      setRealtimeOnlineCount(Object.keys(onlineUsers).length);
+    });
+    
+    return () => unsubscribe();
+  }, []);
   
   // Get online users list (users currently in any room)
   const getOnlineUsersList = () => {
@@ -281,7 +292,7 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
             <div className="flex items-center justify-center space-x-2">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                 <p className="text-sm font-semibold text-text-primary">
-                    {getOnlineCount()} Online
+                    {realtimeOnlineCount} Online
                 </p>
             </div>
             <p className="text-xs text-text-secondary mt-1">

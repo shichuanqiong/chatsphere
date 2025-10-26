@@ -1,19 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { User, UserProfile } from './types';
 import AuthScreen from './components/AuthScreen';
 import ChatScreen from './components/ChatScreen';
 import AdminApp from './components/AdminApp';
 import { getCurrentUser, logout } from './services/authService';
 import { initTrafficTracking } from './services/trafficTrackingService';
+import { initUserPresence, cleanupUserPresence } from './services/presenceService';
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(getCurrentUser());
   const [showAdmin, setShowAdmin] = useState(false);
+  const presenceCleanupRef = useRef<(() => void) | null>(null);
   
   // 初始化流量跟踪
   React.useEffect(() => {
     initTrafficTracking();
   }, []);
+
+  // 初始化用户在线状态追踪
+  React.useEffect(() => {
+    if (currentUser && currentUser.id) {
+      // 清理之前的 presence
+      if (presenceCleanupRef.current) {
+        presenceCleanupRef.current();
+      }
+      
+      // 初始化新的 presence
+      initUserPresence(currentUser).then(cleanup => {
+        presenceCleanupRef.current = cleanup;
+      });
+    }
+    
+    // 清理函数
+    return () => {
+      if (presenceCleanupRef.current) {
+        presenceCleanupRef.current();
+      }
+    };
+  }, [currentUser]);
   
   // 检查URL参数来显示管理员面板
   React.useEffect(() => {
@@ -72,6 +96,10 @@ const App: React.FC = () => {
   };
 
   const handleLogout = () => {
+    // 清理在线状态
+    if (currentUser) {
+      cleanupUserPresence(currentUser);
+    }
     logout();
     setCurrentUser(null);
   }
