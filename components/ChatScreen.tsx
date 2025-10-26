@@ -30,7 +30,10 @@ import {
   cleanupExpiredOfficialMessages,
   getStorageUsage,
   forceCleanupAllExpiredData,
-  canUserCreateRoom
+  canUserCreateRoom,
+  syncRoomsFromFirestore,
+  subscribeToRoomsChanges,
+  getRooms
 } from '../services/roomService';
 import { MenuIcon, LogoutIcon, SpinnerIcon } from './icons';
 
@@ -122,6 +125,27 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ user: initialUser, onLogout }) 
     const interval = setInterval(checkExpiredRooms, 300000); // 5分钟
     return () => clearInterval(interval);
   }, [activeChat]);
+
+  // Firestore 实时同步房间数据
+  useEffect(() => {
+    // 首次加载时同步 Firestore 数据
+    syncRoomsFromFirestore().then(syncedRooms => {
+      const officialRoomsWithMessages = OFFICIAL_ROOMS.map(room => getOfficialRoomWithMessages(room));
+      const allRooms = getAllActiveRooms(officialRoomsWithMessages);
+      setRooms(allRooms);
+    });
+
+    // 订阅房间变化（实时同步）
+    const unsubscribe = subscribeToRoomsChanges((syncedRooms) => {
+      const officialRoomsWithMessages = OFFICIAL_ROOMS.map(room => getOfficialRoomWithMessages(room));
+      const allRooms = getAllActiveRooms(officialRoomsWithMessages);
+      setRooms(allRooms);
+    });
+
+    return () => {
+      unsubscribe(); // 清理订阅
+    };
+  }, []);
 
   useEffect(() => {
     if (!isGuest && user.id) {
@@ -331,7 +355,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ user: initialUser, onLogout }) 
         }
   };
   
-  const handleCreateRoom = (name: string, roomType: 'public' | 'private', icon: string) => {
+  const handleCreateRoom = async (name: string, roomType: 'public' | 'private', icon: string) => {
     if (isGuest) return;
     
     // 检查用户是否可以创建房间
@@ -343,7 +367,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ user: initialUser, onLogout }) 
       }
     }
     
-    const newRoom = createRoom(name, user, roomType, icon);
+    const newRoom = await createRoom(name, user, roomType, icon);
     setActiveChat({ type: 'room', data: newRoom });
     
     // 重新加载房间列表

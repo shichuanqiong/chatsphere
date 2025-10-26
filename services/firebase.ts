@@ -5,12 +5,12 @@ import { getDatabase, ref, set, onValue, off, push, remove } from 'firebase/data
 
 // Firebase配置（从环境变量获取）
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCKog0F-iSoETRwdK_puwR6Xfd0gflrXiM",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "chatsphere-28c89.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "chatsphere-28c89",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "chatsphere-28c89.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "918885541055",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:918885541055:web:54a48c173c4b81f219520a"
 };
 
 // 初始化Firebase

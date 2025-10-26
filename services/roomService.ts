@@ -1,4 +1,6 @@
 import type { ChatRoom, User } from '../types';
+import { db } from './firebase';
+import { collection, doc, getDoc, setDoc, addDoc, updateDoc, getDocs, onSnapshot, Timestamp } from 'firebase/firestore';
 
 const ROOMS_KEY = 'chatsphere_rooms';
 const OFFICIAL_ROOMS_MESSAGES_KEY = 'chatsphere_official_rooms_messages';
@@ -7,6 +9,7 @@ const ROOM_EXPIRY_HOURS = 6; // 房间6小时后过期
 const MESSAGE_EXPIRY_DAYS = 7; // 消息7天后过期
 const ROOM_CREATION_LIMIT = 2; // 一小时内最多创建2个房间
 const ROOM_CREATION_WINDOW_HOURS = 1; // 限制时间窗口：1小时
+const ROOMS_COLLECTION = 'rooms';
 
 // 获取所有房间
 export const getRooms = (): ChatRoom[] => {
@@ -53,7 +56,7 @@ export const canUserCreateRoom = (userId: string): { canCreate: boolean; message
 };
 
 // 创建新房间
-export const createRoom = (name: string, host: User, roomType: 'public' | 'private' = 'public', icon: string = 'chat'): ChatRoom => {
+export const createRoom = async (name: string, host: User, roomType: 'public' | 'private' = 'public', icon: string = 'chat'): Promise<ChatRoom> => {
   const rooms = getRooms();
   const newRoom: ChatRoom = {
     id: `room-${Date.now()}`,
@@ -74,8 +77,20 @@ export const createRoom = (name: string, host: User, roomType: 'public' | 'priva
     icon
   };
   
+  // 保存到 Firestore（跨设备同步）
+  try {
+    await setDoc(doc(db, ROOMS_COLLECTION, newRoom.id), {
+      ...newRoom,
+      createdAt: Timestamp.now()
+    });
+  } catch (error) {
+    console.error('Error saving room to Firestore:', error);
+  }
+  
+  // 同时保存到 localStorage（兼容性）
   rooms.push(newRoom);
   saveRooms(rooms);
+  
   return newRoom;
 };
 
@@ -511,4 +526,73 @@ export const canUserJoinRoomWithKickCheck = (roomId: string, userId: string): bo
   }
   
   return true;
+};
+
+// 从 Firestore 加载所有房间（跨设备同步）
+export const syncRoomsFromFirestore = async (): Promise<ChatRoom[]> => {
+  try {
+    const roomsSnapshot = await getDocs(collection(db, ROOMS_COLLECTION));
+    const firestoreRooms: ChatRoom[] = [];
+    
+    roomsSnapshot.forEach((doc) => {
+      const data = doc.data();
+      firestoreRooms.push({
+        ...data,
+        createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt
+      } as ChatRoom);
+    });
+    
+    // 更新本地 localStorage
+    if (firestoreRooms.length > 0) {
+      const existingRooms = getRooms();
+      const mergedRooms = [...existingRooms, ...firestoreRooms];
+      const uniqueRooms = mergedRooms.filter((room, index, self) => 
+        index === self.findIndex(r => r.id === room.id)
+      );
+      saveRooms(uniqueRooms);
+      return uniqueRooms;
+    }
+    
+    return getRooms();
+  } catch (error) {
+    console.error('Error syncing rooms from Firestore:', error);
+    return getRooms(); // 失败时返回本地数据
+  }
+};
+
+// 实时监听房间变化
+export const subscribeToRoomsChanges = (callback: (rooms: ChatRoom[]) => void): (() => void) => {
+  try {
+    const unsubscribe = onSnapshot(collection(db, ROOMS_COLLECTION), (snapshot) => {
+      const rooms: ChatRoom[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        rooms.push({
+          ...data,
+          createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt
+        } as ChatRoom);
+      });
+      
+      // 更新本地存储
+      saveRooms(rooms);
+      callback(rooms);
+    });
+    
+    return unsubscribe;
+  } catch (error) {
+    console.error('Error subscribing to rooms changes:', error);
+    return () => {}; // 返回空的取消订阅函数
+  }
+};
+
+// 更新房间到 Firestore
+export const updateRoomInFirestore = async (room: ChatRoom): Promise<void> => {
+  try {
+    await updateDoc(doc(db, ROOMS_COLLECTION, room.id), {
+      ...room,
+      createdAt: Timestamp.fromDate(new Date(room.createdAt || new Date()))
+    });
+  } catch (error) {
+    console.error('Error updating room in Firestore:', error);
+  }
 };
