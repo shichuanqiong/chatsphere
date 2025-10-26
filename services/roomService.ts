@@ -79,7 +79,8 @@ export const createRoom = async (name: string, host: User, roomType: 'public' | 
   
   // 保存到 Firestore（跨设备同步）
   try {
-    const firestoreRoom = {
+    // 只保存非 undefined 的字段
+    const firestoreRoom: any = {
       id: newRoom.id,
       name: newRoom.name,
       host: newRoom.host,
@@ -89,9 +90,14 @@ export const createRoom = async (name: string, host: User, roomType: 'public' | 
       isOfficial: newRoom.isOfficial,
       createdAt: Timestamp.now(),
       roomType: newRoom.roomType,
-      invitedUsers: newRoom.invitedUsers,
       icon: newRoom.icon
     };
+    
+    // 只有私有房间才添加 invitedUsers
+    if (roomType === 'private' && newRoom.invitedUsers) {
+      firestoreRoom.invitedUsers = newRoom.invitedUsers;
+    }
+    
     await setDoc(doc(db, ROOMS_COLLECTION, newRoom.id), firestoreRoom);
     console.log('Room saved to Firestore:', newRoom.id);
   } catch (error) {
