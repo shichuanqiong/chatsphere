@@ -565,9 +565,6 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
                     )}
                     <h2 className="text-lg font-semibold text-text-primary">Online Users</h2>
                 </div>
-                <p className="text-sm text-text-secondary">
-                    ({getOnlineUsersList().filter(u => u.id !== currentUser.id).length} online)
-                </p>
             </div>
                 {isUsersExpanded && (
                 <>
