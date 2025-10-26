@@ -19,13 +19,13 @@ const App: React.FC = () => {
 
   // 初始化用户在线状态追踪
   React.useEffect(() => {
-    if (currentUser && currentUser.id) {
+    if (currentUser) {
       // 清理之前的 presence
       if (presenceCleanupRef.current) {
         presenceCleanupRef.current();
       }
       
-      // 初始化新的 presence
+      // 初始化新的 presence（包括 Guest）
       initUserPresence(currentUser).then(cleanup => {
         presenceCleanupRef.current = cleanup;
       });

@@ -518,9 +518,16 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
         {!isGuest && (
             <div className="mt-4">
                  <div className="flex justify-between items-center p-4">
-                    <h2 className="text-lg font-semibold text-text-primary cursor-pointer" onClick={() => setIsFriendsExpanded(!isFriendsExpanded)}>
-                        Friends
-                    </h2>
+                    <div className="flex items-center space-x-2 cursor-pointer" onClick={() => setIsFriendsExpanded(!isFriendsExpanded)}>
+                        {isFriendsExpanded ? (
+                            <ChevronDownIcon className="w-4 h-4 text-text-secondary" />
+                        ) : (
+                            <ChevronRightIcon className="w-4 h-4 text-text-secondary" />
+                        )}
+                        <h2 className="text-lg font-semibold text-text-primary">
+                            Friends
+                        </h2>
+                    </div>
                     <button onClick={(e) => { e.stopPropagation(); onAddFriend(); }} className="text-highlight hover:text-teal-400">
                         <UserPlusIcon className="w-6 h-6"/>
                     </button>

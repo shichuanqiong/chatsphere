@@ -22,9 +22,8 @@ export const subscribeToOnlineStatus = (callback: (onlineUsers: { [uid: string]:
 
 // 设置用户在线状态（在 App.tsx 中调用）
 export const initUserPresence = async (user: User) => {
-  if (!user.id) return;
-  
-  const uid = user.id;
+  // Guest 用户也需要在线状态
+  const uid = user.id || `guest-${user.nickname}`;
   const infoRef = ref(realtimeDB, '.info/connected');
   const userStatusRef = ref(realtimeDB, `status/${uid}`);
   const connsRef = ref(realtimeDB, `connections/${uid}`);
@@ -70,9 +69,7 @@ export const initUserPresence = async (user: User) => {
 
 // 退出登录时清理
 export const cleanupUserPresence = async (user: User) => {
-  if (!user.id) return;
-  
-  const uid = user.id;
+  const uid = user.id || `guest-${user.nickname}`;
   const userStatusRef = ref(realtimeDB, `status/${uid}`);
   const connsRef = ref(realtimeDB, `connections/${uid}`);
   
