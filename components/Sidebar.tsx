@@ -207,52 +207,22 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
   
   // Get online users (users who are currently in any room)
   const getOnlineUsers = () => {
-    const allUsers = getAllUsers();
     const onlineUserIds = new Set<string>();
     
-    // Collect all user IDs from room participants (include both registered users and guests)
+    // Collect all unique user IDs from room participants
     rooms.forEach(room => {
       room.participants.forEach(participant => {
         if (participant.id) {
-          // Include registered users (ID starts with 'user-')
+          // Registered user
           onlineUserIds.add(participant.id);
         } else if (participant.nickname) {
-          // Include guests (no ID but have nickname) - use nickname as unique identifier
+          // Guest user - use nickname as unique identifier
           onlineUserIds.add(`guest-${participant.nickname}`);
         }
       });
     });
     
-    // Get all online users (both registered and guests)
-    const registeredOnlineUsers = allUsers.filter(user => user.id && onlineUserIds.has(user.id));
-    
-    // Get guest users from room participants
-    const guestUsers: User[] = [];
-    rooms.forEach(room => {
-      room.participants.forEach(participant => {
-        if (!participant.id && participant.nickname) {
-          // Check if this guest is already added
-          const isAlreadyAdded = guestUsers.some(guest => guest.nickname === participant.nickname);
-          if (!isAlreadyAdded) {
-            guestUsers.push({
-              id: `guest-${participant.nickname}`,
-              nickname: participant.nickname,
-              age: participant.age || 0,
-              gender: participant.gender || 'Other',
-              country: participant.country || '',
-              avatar: participant.avatar || '',
-              bio: participant.bio || '',
-              friends: []
-            });
-          }
-        }
-      });
-    });
-    
-    // Combine all online users
-    const allOnlineUsers = [...registeredOnlineUsers, ...guestUsers];
-    
-    return allOnlineUsers;
+    return Array.from(onlineUserIds);
   };
 
 
