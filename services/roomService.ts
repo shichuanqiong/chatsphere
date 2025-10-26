@@ -79,10 +79,21 @@ export const createRoom = async (name: string, host: User, roomType: 'public' | 
   
   // 保存到 Firestore（跨设备同步）
   try {
-    await setDoc(doc(db, ROOMS_COLLECTION, newRoom.id), {
-      ...newRoom,
-      createdAt: Timestamp.now()
-    });
+    const firestoreRoom = {
+      id: newRoom.id,
+      name: newRoom.name,
+      host: newRoom.host,
+      hostId: newRoom.hostId,
+      participants: newRoom.participants,
+      messages: newRoom.messages,
+      isOfficial: newRoom.isOfficial,
+      createdAt: Timestamp.now(),
+      roomType: newRoom.roomType,
+      invitedUsers: newRoom.invitedUsers,
+      icon: newRoom.icon
+    };
+    await setDoc(doc(db, ROOMS_COLLECTION, newRoom.id), firestoreRoom);
+    console.log('Room saved to Firestore:', newRoom.id);
   } catch (error) {
     console.error('Error saving room to Firestore:', error);
   }
