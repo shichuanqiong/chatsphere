@@ -207,12 +207,21 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
   
   // Get online users (all logged-in users, not just those in rooms)
   const getOnlineUsers = () => {
-    const allUsers = getAllUsers();
-    // Count all registered users + current guest (if guest)
-    // This counts ALL logged-in users on the site, not just those in rooms
-    const guestId = currentUser.id ? undefined : `guest-${currentUser.nickname}`;
-    
-    return allUsers.length + (guestId ? 1 : 0);
+    try {
+      const allUsers = getAllUsers();
+      // Safety check: ensure allUsers is an array
+      if (!Array.isArray(allUsers)) {
+        console.error('getAllUsers returned non-array:', allUsers);
+        return 0;
+      }
+      // Count all registered users + current guest (if guest)
+      // This counts ALL logged-in users on the site, not just those in rooms
+      const isGuest = !currentUser.id;
+      return allUsers.length + (isGuest ? 1 : 0);
+    } catch (error) {
+      console.error('Error getting online users:', error);
+      return 0;
+    }
   };
 
 
