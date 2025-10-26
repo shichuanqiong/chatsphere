@@ -187,77 +187,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ user: initialUser, onLogout }) 
       }, 0);
       setUnreadPrivateMessages(unreadPrivateCount);
     }
-  }, [user.id, isGuest]);
 
-  // Effect to simulate incoming messages for unread indicators
-  useEffect(() => {
-    const messageInterval = setInterval(() => {
-      const availableRooms = [...rooms, ...userCreatedRooms];
-      const inactiveRooms = availableRooms.filter(r => r.id !== activeChat?.data.id);
-      
-      if (inactiveRooms.length > 0) {
-        const randomRoom = inactiveRooms[Math.floor(Math.random() * inactiveRooms.length)];
-        
-        const allPossibleUsers = getAllUsers().filter(u => u.id !== user.id && u.id !== randomRoom.host?.id);
-        const shouldSimulateUserMessage = Math.random() > 0.5 && allPossibleUsers.length > 0;
-        
-        let sender: User;
-
-        if (shouldSimulateUserMessage && allPossibleUsers.length > 0) {
-            sender = allPossibleUsers[Math.floor(Math.random() * allPossibleUsers.length)];
-        } else if (randomRoom.participants.length > 0) {
-            sender = randomRoom.participants[Math.floor(Math.random() * randomRoom.participants.length)];
-        } else {
-            // Skip this iteration if no valid sender
-            return;
-        }
-
-        const cannedResponses = ["That's an interesting point.", "I was just thinking the same thing!", "Can you elaborate on that?", "Haha, classic!", "Let's change the topic slightly."];
-        
-        const simulatedMessage: Message = {
-          id: `simulated-${Date.now()}`,
-          text: cannedResponses[Math.floor(Math.random() * cannedResponses.length)],
-          sender: sender,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        };
-
-        const updateRoomWithMessage = (roomList: ChatRoom[]) =>
-          roomList.map(r => r.id === randomRoom.id ? { ...r, messages: [...r.messages, simulatedMessage] } : r);
-
-        if (randomRoom.isOfficial) {
-          setRooms(updateRoomWithMessage);
-        } else {
-          setUserCreatedRooms(updateRoomWithMessage);
-        }
-
-        // Only mark as unread if it's not the currently active chat and it has real participants
-        if (activeChat?.data.id !== randomRoom.id) {
-          // For both official and user-created rooms, only mark as unread if they have real participants
-          // For user-created rooms, only show unread if there are at least 2 participants (host + at least one other)
-          const hasRealParticipants = randomRoom.participants.some(p => p.id && p.id !== 'system');
-          const hasMultipleParticipants = randomRoom.participants.filter(p => p.id && p.id !== 'system').length >= 2;
-          
-          if (hasRealParticipants && (randomRoom.isOfficial || hasMultipleParticipants)) {
-            setUnreadChats(prev => new Set(prev).add(randomRoom.id));
-          }
-        }
-      }
-    }, 20000); // Simulate a message every 20 seconds
-
-    return () => clearInterval(messageInterval);
-  }, [activeChat, rooms, userCreatedRooms, user.id]);
-
-
-  // 保存最后访问的聊天
-  useEffect(() => {
-    if (activeChat) {
-      const chatData = {
-        type: activeChat.type,
-        id: activeChat.type === 'room' ? activeChat.data.id : activeChat.data.id,
-        otherUserId: activeChat.type === 'private' ? activeChat.otherUser.id : null
-      };
-      localStorage.setItem('lastVisitedChat', JSON.stringify(chatData));
-    }
   }, [activeChat]);
 
   // 清理房间 presence（组件卸载或用户离开时）
