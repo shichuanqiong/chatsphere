@@ -81,8 +81,8 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ user: initialUser, onLogout }) 
       
       // 为官方房间加载额外消息
       const officialRoomsWithMessages = OFFICIAL_ROOMS.map(room => getOfficialRoomWithMessages(room));
-      const userRooms = getAllActiveRooms([]); // 只获取用户房间
-      const allRooms = [...officialRoomsWithMessages, ...userRooms];
+      // 使用 getAllActiveRooms 获取所有活跃房间（包括官方和用户创建的房间）
+      const allRooms = getAllActiveRooms(officialRoomsWithMessages);
       
       setRooms(allRooms);
       
@@ -107,8 +107,8 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ user: initialUser, onLogout }) 
       
       // 为官方房间加载额外消息
       const officialRoomsWithMessages = OFFICIAL_ROOMS.map(room => getOfficialRoomWithMessages(room));
-      const userRooms = getAllActiveRooms([]); // 只获取用户房间
-      const allRooms = [...officialRoomsWithMessages, ...userRooms];
+      // 使用 getAllActiveRooms 获取所有活跃房间（包括官方和用户创建的房间）
+      const allRooms = getAllActiveRooms(officialRoomsWithMessages);
       
       setRooms(allRooms);
       
@@ -350,8 +350,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ user: initialUser, onLogout }) 
     
     // 重新加载房间列表
     const officialRoomsWithMessages = OFFICIAL_ROOMS.map(room => getOfficialRoomWithMessages(room));
-    const userRooms = getAllActiveRooms([]);
-    const allRooms = [...officialRoomsWithMessages, ...userRooms];
+    const allRooms = getAllActiveRooms(officialRoomsWithMessages);
     setRooms(allRooms);
     
     if (user.id) {
@@ -389,8 +388,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ user: initialUser, onLogout }) 
   const handleInviteSuccess = () => {
     // 重新加载房间列表以显示更新的邀请信息
     const officialRoomsWithMessages = OFFICIAL_ROOMS.map(room => getOfficialRoomWithMessages(room));
-    const userRooms = getAllActiveRooms([]);
-    const allRooms = [...officialRoomsWithMessages, ...userRooms];
+    const allRooms = getAllActiveRooms(officialRoomsWithMessages);
     setRooms(allRooms);
   };
 
@@ -497,8 +495,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ user: initialUser, onLogout }) 
 
         // 更新房间列表
         const officialRoomsWithMessages = OFFICIAL_ROOMS.map(room => getOfficialRoomWithMessages(room));
-        const userRooms = getAllActiveRooms([]);
-        const allRooms = [...officialRoomsWithMessages, ...userRooms];
+        const allRooms = getAllActiveRooms(officialRoomsWithMessages);
         setRooms(allRooms);
 
         // 更新聊天历史
