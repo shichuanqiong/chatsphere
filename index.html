@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2338b2ac'%3E%3Cpath d='M12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM10.25 15.195L8.03 17.419C8.423 17.754 8.87 18.024 9.356 18.221L11.232 16.344C10.835 16.035 10.505 15.642 10.25 15.195ZM16.344 11.232L18.221 9.356C18.024 8.87 17.754 8.423 17.419 8.03L15.195 10.25C15.642 10.505 16.035 10.835 16.344 11.232ZM13.75 8.805L15.97 6.581C15.577 6.246 15.13 5.976 14.644 5.779L12.768 7.656C13.165 7.965 13.495 8.358 13.75 8.805ZM7.656 12.768L5.779 14.644C5.976 15.13 6.246 15.577 6.581 15.97L8.805 13.75C8.358 13.495 7.965 13.165 7.656 12.768Z' opacity='0.4'/%3E%3Cpath d='M12 6C8.686 6 6 8.686 6 12C6 15.314 8.686 18 12 18C15.314 18 18 15.314 18 12C18 8.686 15.314 6 12 6ZM14 14H10C9.448 14 9 13.552 9 13V11C9 10.448 9.448 10 10 10H14C14.552 10 15 10.448 15 11V13C15 13.552 14.552 14 14 14Z'/%3E%3C/svg%3E" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Join ChatSphere, the modern social chat community. Connect with friends, message in real-time, and start meaningful conversations. Free online chat platform with instant messaging and group chats." />
+    <meta name="keywords" content="chat,social,community,messaging,real-time,online,online chat,chat rooms,instant messaging,social network,group chat,private chat" />
+    <meta name="author" content="ChatSphere" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://chatsphere.live/" />
+    <meta property="og:title" content="ChatSphere - Real-time Social Chat Community | Online Messaging Platform" />
+    <meta property="og:description" content="Join ChatSphere, the modern social chat community. Connect with friends, message in real-time, and start meaningful conversations. Free online chat platform with instant messaging and group chats." />
+    <meta property="og:image" content="https://chatsphere.live/og-image.jpg" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://chatsphere.live/" />
+    <meta property="twitter:title" content="ChatSphere - Real-time Social Chat Community | Online Messaging Platform" />
+    <meta property="twitter:description" content="Join ChatSphere, the modern social chat community. Connect with friends, message in real-time, and start meaningful conversations. Free online chat platform with instant messaging and group chats." />
+    <meta property="twitter:image" content="https://chatsphere.live/og-image.jpg" />
+    
+    <!-- Additional SEO -->
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="theme-color" content="#38b2ac" />
+    <meta name="msapplication-TileColor" content="#38b2ac" />
+    <link rel="canonical" href="https://chatsphere.live/" />
+    
+    <title>ChatSphere - Real-time Social Chat Community | Online Messaging Platform</title>
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "ChatSphere",
+      "description": "Modern social chat community with real-time messaging, group chats, and private conversations",
+      "url": "https://chatsphere.live/",
+      "applicationCategory": "SocialNetworkingApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "creator": {
+        "@type": "Organization",
+        "name": "ChatSphere",
+        "url": "https://chatsphere.live/"
+      },
+      "featureList": [
+        "Real-time messaging",
+        "Group chat rooms",
+        "Private conversations",
+        "Global community",
+        "Mobile-friendly interface",
+        "Secure communication"
+      ]
+    }
+    </script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'primary': '#1e293b',
+              'secondary': '#334155',
+              'accent': '#475569',
+              'highlight': '#38b2ac',
+              'text-primary': '#f8fafc',
+              'text-secondary': '#cbd5e1',
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      @keyframes highlight-fade {
+        from { background-color: rgba(56, 178, 172, 0.3); }
+        to { background-color: transparent; }
+      }
+      .new-message-highlight {
+        animation: highlight-fade 2s ease-out;
+      }
+      @keyframes slide-in {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      .animate-slide-in {
+        animation: slide-in 0.3s ease-out;
+      }
+      .bg, .bg-next {
+        position:fixed; inset:0;
+        background-size:cover; background-position:center;
+        filter:grayscale(100%) contrast(105%) brightness(0.95);
+        transition: opacity 900ms ease;
+      }
+      
+      /* Enhanced cursor visibility for dark backgrounds - only on auth pages */
+      .auth-page * {
+        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="white" stroke="black" stroke-width="2"/><circle cx="10" cy="10" r="3" fill="black"/></svg>'), auto;
+      }
+      
+      .auth-page input, .auth-page textarea, .auth-page select {
+        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" fill="white" stroke="black" stroke-width="2"/><rect x="6" y="6" width="8" height="8" fill="black"/></svg>'), text;
+      }
+      
+      .auth-page button, .auth-page a, .auth-page [role="button"] {
+        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path d="M2 2 L18 10 L2 18 Z" fill="white" stroke="black" stroke-width="2"/></svg>'), pointer;
+      }
+      
+      /* Mobile optimization */
+      @media (max-width: 768px) {
+        input, textarea, select, button {
+          font-size: 16px !important; /* Prevent zoom on iOS */
+          min-height: 44px; /* Minimum touch target size */
+        }
+        
+        .mobile-optimized {
+          padding: 1rem;
+          font-size: 16px;
+        }
+        
+        .mobile-button {
+          min-height: 48px;
+          padding: 12px 24px;
+        }
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.27.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-primary text-text-primary">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

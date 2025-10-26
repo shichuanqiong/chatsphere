@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://chatsphere.live/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Disallow admin panel
+Disallow: /admin
+Disallow: /?admin=true
+
+# Allow all other content
+Allow: /login
+Allow: /register
+Allow: /chat
+Allow: /rooms
+Allow: /profile
