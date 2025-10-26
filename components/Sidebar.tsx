@@ -206,35 +206,34 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
   const [isOfficialRoomsExpanded, setIsOfficialRoomsExpanded] = useState(true);
   const [genderFilter, setGenderFilter] = useState<'All' | 'Male' | 'Female'>('All');
   const [realtimeOnlineCount, setRealtimeOnlineCount] = useState<number>(0);
+  const [realtimeOnlineUsers, setRealtimeOnlineUsers] = useState<{ [uid: string]: boolean }>({});
 
   // 订阅实时在线状态
   useEffect(() => {
     const unsubscribe = subscribeToOnlineStatus((onlineUsers) => {
+      console.log('📊 Sidebar received online users:', onlineUsers);
       setRealtimeOnlineCount(Object.keys(onlineUsers).length);
+      setRealtimeOnlineUsers(onlineUsers);
     });
     
     return () => unsubscribe();
   }, []);
   
-  // Get online users list (users currently in any room)
+  // Get online users list from RTDB
   const getOnlineUsersList = () => {
     try {
-      // Get all users who are currently in any room
-      const onlineUserIds = new Set<string>();
-      const onlineUsersMap = new Map<string, User>();
+      // Get all registered users
+      const allUsers = getAllUsers();
       
-      // Collect users from room participants
-      rooms.forEach(room => {
-        room.participants.forEach(participant => {
-          if (participant.id && !onlineUserIds.has(participant.id)) {
-            onlineUserIds.add(participant.id);
-            onlineUsersMap.set(participant.id, participant as User);
-          }
-        });
+      // Filter to only show users who are online according to RTDB
+      const onlineUsers = allUsers.filter(user => {
+        if (!user.id) return false;
+        return realtimeOnlineUsers[user.id] === true;
       });
       
-      // Return array of users who are actually in rooms (not from localStorage)
-      return Array.from(onlineUsersMap.values());
+      console.log('👥 Online users from RTDB:', onlineUsers.length, onlineUsers.map(u => u.nickname));
+      
+      return onlineUsers;
     } catch (error) {
       console.error('Error getting online users list:', error);
       return [];

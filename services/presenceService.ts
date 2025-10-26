@@ -10,9 +10,13 @@ let presenceUnsubscribe: (() => void) | null = null;
 export const subscribeToOnlineStatus = (callback: (onlineUsers: { [uid: string]: boolean }) => void) => {
   const statusRef = ref(realtimeDB, 'status');
   
+  console.log('🔍 Subscribing to online status...');
+  
   return onValue(statusRef, (snapshot) => {
     const statuses = snapshot.val();
     const onlineUsers: { [uid: string]: boolean } = {};
+    
+    console.log('📊 Status data:', statuses);
     
     if (statuses) {
       Object.keys(statuses).forEach(uid => {
@@ -20,6 +24,7 @@ export const subscribeToOnlineStatus = (callback: (onlineUsers: { [uid: string]:
       });
     }
     
+    console.log('👥 Online users:', Object.keys(onlineUsers).length, onlineUsers);
     callback(onlineUsers);
   });
 };
