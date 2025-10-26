@@ -533,7 +533,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ user: initialUser, onLogout }) 
 
         // 保存消息到相应的存储
         if (room.isOfficial) {
-          addOfficialRoomMessage(room.id, userMessage);
+          await addOfficialRoomMessage(room.id, userMessage);
         } else {
           await addMessageToRoom(room.id, userMessage);
         }

@@ -281,7 +281,7 @@ export const getOfficialRoomMessages = (roomId: string): any[] => {
   return allMessages[roomId] || [];
 };
 
-export const addOfficialRoomMessage = (roomId: string, message: any): void => {
+export const addOfficialRoomMessage = async (roomId: string, message: any): Promise<void> => {
   const messages = localStorage.getItem(OFFICIAL_ROOMS_MESSAGES_KEY);
   const allMessages = messages ? JSON.parse(messages) : {};
   
@@ -291,6 +291,43 @@ export const addOfficialRoomMessage = (roomId: string, message: any): void => {
   
   allMessages[roomId].push(message);
   localStorage.setItem(OFFICIAL_ROOMS_MESSAGES_KEY, JSON.stringify(allMessages));
+  
+  // 同步到 Firestore（如果是 official room，需要找到对应的 Firestore document）
+  try {
+    // 查找对应的 room document
+    const roomsSnapshot = await getDocs(collection(db, ROOMS_COLLECTION));
+    let firestoreRoomDoc = null;
+    
+    roomsSnapshot.forEach((doc) => {
+      if (doc.id === roomId) {
+        firestoreRoomDoc = doc;
+      }
+    });
+    
+    if (firestoreRoomDoc) {
+      const existingMessages = firestoreRoomDoc.data().messages || [];
+      await updateDoc(firestoreRoomDoc.ref, {
+        messages: [...existingMessages, message]
+      });
+      console.log('✅ Official room message synced to Firestore:', roomId);
+    } else {
+      // 如果是官方房间，尝试创建或更新
+      await setDoc(doc(db, ROOMS_COLLECTION, roomId), {
+        id: roomId,
+        name: OFFICIAL_ROOMS.find(r => r.id === roomId)?.name || roomId,
+        isOfficial: true,
+        messages: allMessages[roomId],
+        hostId: 'system',
+        host: { nickname: 'System', id: 'system' },
+        participants: [],
+        createdAt: new Date().toISOString(),
+        roomType: 'public'
+      }, { merge: true });
+      console.log('✅ Created/updated official room in Firestore:', roomId);
+    }
+  } catch (error) {
+    console.error('❌ Failed to sync official room message to Firestore:', error);
+  }
 };
 
 // 检查消息是否过期
