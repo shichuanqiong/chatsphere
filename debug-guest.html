@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Debug Guest Users</title>
+</head>
+<body>
+  <h1>Guest Users Debug</h1>
+  <button onclick="checkUsers()">Check localStorage</button>
+  <div id="output"></div>
+  
+  <script>
+    function checkUsers() {
+      const users = JSON.parse(localStorage.getItem('chatsphere_users') || '[]');
+      const guestUsers = users.filter(u => u.id && u.id.startsWith('guest-'));
+      const output = document.getElementById('output');
+      
+      output.innerHTML = `
+        <h2>Total users: ${users.length}</h2>
+        <h2>Guest users: ${guestUsers.length}</h2>
+        <h3>Guest IDs:</h3>
+        <pre>${JSON.stringify(guestUsers.map(u => ({id: u.id, nickname: u.nickname})), null, 2)}</pre>
+        <h3>All users:</h3>
+        <pre>${JSON.stringify(users.map(u => ({id: u.id, nickname: u.nickname})), null, 2)}</pre>
+      `;
+    }
+  </script>
+</body>
+</html>
+

@@ -49,8 +49,20 @@ const DataAnalytics: React.FC = () => {
     const users = getAllUsers();
     const rooms = getAllRoomsForAdmin();
     
-    const registeredUsers = users.filter(u => !u.id?.startsWith('guest-'));
-    const guestUsers = users.filter(u => u.id?.startsWith('guest-'));
+    // 兼容两种判断方式：1) id 前缀 "guest-", 2) isGuest 字段
+    const registeredUsers = users.filter(u => {
+      if (!u.id) return false;
+      const isGuestById = u.id.startsWith('guest-');
+      const isGuestByField = (u as any).isGuest === true;
+      return !(isGuestById || isGuestByField);
+    });
+    
+    const guestUsers = users.filter(u => {
+      if (!u.id) return false;
+      const isGuestById = u.id.startsWith('guest-');
+      const isGuestByField = (u as any).isGuest === true;
+      return isGuestById || isGuestByField;
+    });
     
     const totalMessages = rooms.reduce((sum, room) => sum + room.messages.length, 0);
     const avgMessagesPerUser = users.length > 0 ? (totalMessages / users.length).toFixed(1) : '0';

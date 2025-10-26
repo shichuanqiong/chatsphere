@@ -76,6 +76,26 @@ const TrafficAnalytics: React.FC = () => {
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
+        {/* Clear Mock Data Button */}
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-yellow-800 font-medium">检测到模拟数据</p>
+              <p className="text-yellow-700 text-sm mt-1">需要清除模拟数据以查看真实流量</p>
+            </div>
+            <button
+              onClick={() => {
+                localStorage.removeItem('chatsphere_traffic_data');
+                alert('模拟数据已清除！页面将在 3 秒后刷新...');
+                setTimeout(() => location.reload(), 3000);
+              }}
+              className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            >
+              清除模拟数据
+            </button>
+          </div>
+        </div>
+        
         {/* Header */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
           <div className="flex items-center justify-between">

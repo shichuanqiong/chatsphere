@@ -1,0 +1,36 @@
+{
+  "rules": {
+    ".read": true,
+    ".write": true,
+    "status": {
+      "$uid": {
+        ".read": true,
+        ".write": "true"
+      }
+    },
+    "connections": {
+      "$uid": {
+        ".read": true,
+        ".write": "true",
+        "$connId": {
+          ".read": true,
+          ".write": "true"
+        }
+      }
+    },
+    "roomMembers": {
+      "$roomId": {
+        ".read": true,
+        ".write": "true",
+        "$uid": {
+          ".read": true,
+          ".write": "true"
+        }
+      }
+    },
+    "debug": {
+      ".read": true,
+      ".write": "true"
+    }
+  }
+}

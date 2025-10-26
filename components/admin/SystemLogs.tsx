@@ -12,6 +12,10 @@ const SystemLogs: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    loadLogs();
+  }, [filters.level, filters.category, filters.search, filters.limit]);
+  
+  useEffect(() => {
     // 初始化示例日志
     initSampleLogs();
     loadLogs();
@@ -23,7 +27,7 @@ const SystemLogs: React.FC = () => {
     }, 30000);
     
     return () => clearInterval(interval);
-  }, [filters]);
+  }, []);
 
   const handleRefresh = () => {
     // 手动添加一条新日志
@@ -109,7 +113,7 @@ const SystemLogs: React.FC = () => {
               placeholder="Search logs..."
               value={filters.search}
               onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 bg-white placeholder-gray-400"
             />
           </div>
           <div>

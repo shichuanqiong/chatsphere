@@ -22,17 +22,20 @@ const UserManagement: React.FC = () => {
   const loadUsers = () => {
     setIsLoading(true);
     try {
+      // 强制重新读取 localStorage 最新数据
       const allUsers = getAllUsersForAdmin();
       setUsers(allUsers);
+      // 使用新加载的数据立即过滤
+      filterUsers(allUsers);
+      setIsLoading(false);
     } catch (error) {
       console.error('Failed to load users:', error);
-    } finally {
       setIsLoading(false);
     }
   };
 
-  const filterUsers = () => {
-    let filtered = users;
+  const filterUsers = (userList = users) => {
+    let filtered = userList;
 
     // Filter by type
     if (filterType === 'registered') {
@@ -172,7 +175,7 @@ const UserManagement: React.FC = () => {
               placeholder="Search users by nickname, email, or country..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 bg-white placeholder-gray-400"
             />
           </div>
           <div className="flex gap-2">

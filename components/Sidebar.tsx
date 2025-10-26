@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { User, ChatRoom, PrivateChat } from '../types';
 import { PlusIcon, UsersIcon, VerifiedIcon, UserPlusIcon, XIcon, ChevronDownIcon, ChevronRightIcon } from './icons';
 import { subscribeToOnlineStatus, getOnlineUsers } from '../services/presenceService';
+import { subscribeToRoomMemberCount } from '../services/roomPresenceService';
 
 // 房间图标映射
 const ROOM_ICONS: { [key: string]: string } = {
@@ -207,6 +208,7 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
   const [genderFilter, setGenderFilter] = useState<'All' | 'Male' | 'Female'>('All');
   const [realtimeOnlineCount, setRealtimeOnlineCount] = useState<number>(0);
   const [realtimeOnlineUsers, setRealtimeOnlineUsers] = useState<{ [uid: string]: boolean }>({});
+  const [realtimeRoomCounts, setRealtimeRoomCounts] = useState<{ [roomId: string]: number }>({});
 
   // 订阅实时在线状态
   useEffect(() => {
@@ -218,17 +220,42 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
     
     return () => unsubscribe();
   }, []);
+
+  // 订阅所有房间的实时人数
+  useEffect(() => {
+    const unsubscribes: Array<() => void> = [];
+    
+    // 订阅所有房间的人数变化
+    rooms.forEach(room => {
+      const unsubscribe = subscribeToRoomMemberCount(room.id, (count) => {
+        setRealtimeRoomCounts(prev => ({ ...prev, [room.id]: count }));
+      });
+      unsubscribes.push(unsubscribe);
+    });
+    
+    return () => {
+      unsubscribes.forEach(unsub => unsub());
+    };
+  }, [rooms]);
   
   // Get online users list from RTDB
   const getOnlineUsersList = () => {
     try {
       // Get all registered users
       const allUsers = getAllUsers();
+      console.log('🔍 All users from getAllUsers():', allUsers.length, allUsers.map(u => ({ id: u.id, nickname: u.nickname })));
+      console.log('🔍 Realtime online users:', realtimeOnlineUsers);
+      console.log('🔍 Current user:', currentUser.id, currentUser.nickname);
       
       // Filter to only show users who are online according to RTDB
       const onlineUsers = allUsers.filter(user => {
         if (!user.id) return false;
-        return realtimeOnlineUsers[user.id] === true;
+        const isOnline = realtimeOnlineUsers[user.id] === true;
+        
+        // Always include current user
+        if (user.id === currentUser.id) return true;
+        
+        return isOnline;
       });
       
       console.log('👥 Online users from RTDB:', onlineUsers.length, onlineUsers.map(u => u.nickname));
@@ -308,7 +335,7 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
                     ) : (
                         <ChevronRightIcon className="w-4 h-4 text-text-secondary" />
                     )}
-                    <h3 className="text-sm font-semibold text-text-primary">Official Rooms</h3>
+                    <h3 className="text-lg font-semibold text-text-primary">Official Rooms</h3>
                 </div>
             </div>
                     {isOfficialRoomsExpanded && (
@@ -337,7 +364,7 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
                                         <h3 className="font-semibold truncate text-text-primary">{room.name}</h3>
                                                 {hasUnread && <UnreadIndicator />}
                                             </div>
-                                    <p className="text-sm text-text-secondary truncate">{room.participants.length} participants</p>
+                                    <p className="text-sm text-text-secondary truncate">{realtimeRoomCounts[room.id] ?? room.participants.length} participants</p>
                                 </div>
                             </button>
                         </li>
@@ -346,6 +373,75 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
                     </ul>
                     )}
         </div>
+
+        {/* Friends Section */}
+        {!isGuest && (
+            <div className="mt-4">
+                 <div className="flex justify-between items-center p-4">
+                    <div className="flex items-center space-x-2 cursor-pointer" onClick={() => setIsFriendsExpanded(!isFriendsExpanded)}>
+                        {isFriendsExpanded ? (
+                            <ChevronDownIcon className="w-4 h-4 text-text-secondary" />
+                        ) : (
+                            <ChevronRightIcon className="w-4 h-4 text-text-secondary" />
+                        )}
+                        <h2 className="text-lg font-semibold text-text-primary">
+                            Friends
+                        </h2>
+                    </div>
+                    <button onClick={(e) => { e.stopPropagation(); onAddFriend(); }} className="text-highlight hover:text-teal-400">
+                        <UserPlusIcon className="w-6 h-6"/>
+                    </button>
+                </div>
+                {isFriendsExpanded && (
+                     <ul>
+                        {friends.length === 0 && <p className="px-4 text-sm text-text-secondary">Your friend list is empty.</p>}
+                        {friends.map(friend => (
+                            <li key={friend.id}>
+                                <div className="flex items-center">
+                                <button
+                                        onClick={() => {
+                                            if (currentUser.id) {
+                                                const privateChat = getOrCreatePrivateChat(currentUser.id, friend.id!);
+                                                onSelectPrivateChat(privateChat, friend);
+                                            }
+                                        }}
+                                        className={`flex-1 text-left p-3 flex items-center space-x-3 transition-colors duration-200 ${friend.gender === 'Female' ? 'hover:bg-pink-100/40' : 'hover:bg-accent/60'}`}
+                                        title="Start private chat"
+                                >
+                                    <div className="relative">
+                                    {friend.avatar ? (
+                                        <div className={`w-10 h-10 rounded-full p-0.5 ${friend.gender === 'Female' ? 'bg-pink-300/80 ring-2 ring-pink-400/70' : 'bg-blue-300/80 ring-2 ring-blue-400/70'}`}>
+                                            <img src={friend.avatar} alt={friend.nickname} className="w-full h-full rounded-full object-cover"/>
+                                        </div>
+                                    ) : (
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white self-start ${friend.gender === 'Female' ? 'bg-pink-500 ring-2 ring-pink-400/70' : 'bg-blue-500 ring-2 ring-blue-400/70'}`}>
+                                            {friend.nickname.substring(0,2).toUpperCase()}
+                                        </div>
+                                    )}
+                                    <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 border-2 border-secondary"></span>
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className={`font-semibold truncate text-text-primary`}>{friend.nickname}</h3>
+                                        <p className="text-sm text-text-secondary truncate">{`${friend.age}, ${friend.country}`}</p>
+                                    </div>
+                                </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onRemoveFriend(friend.id!);
+                                        }}
+                                        className="p-2 text-red-400 hover:text-red-300 hover:bg-red-400/20 rounded-lg transition-colors"
+                                        title="Remove friend"
+                                    >
+                                        <XIcon className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </li>
+                        ))}
+                     </ul>
+                )}
+            </div>
+        )}
 
         {/* My Rooms - Only for registered users */}
         {!isGuest && (
@@ -424,7 +520,7 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
                                                 </div>
                                             </div>
                                             <p className="text-sm text-text-secondary truncate">
-                                                {isExpired ? 'Room expired' : `${room.participants.length} participants`}
+                                                {isExpired ? 'Room expired' : `${realtimeRoomCounts[room.id] ?? room.participants.length} participants`}
                                             </p>
                                         </div>
                                     </button>
@@ -501,7 +597,7 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
                                             {hasUnread && !isExpired && <UnreadIndicator />}
                                         </div>
                                         <p className="text-sm text-text-secondary truncate">
-                                            {isExpired ? 'Room expired' : `${room.participants.length} participants`}
+                                            {isExpired ? 'Room expired' : `${realtimeRoomCounts[room.id] ?? room.participants.length} participants`}
                                         </p>
                                         </div>
                                     </button>
@@ -511,77 +607,6 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
                     </ul>
             )}
         </div>
-
-
-         {/* Friends Section */}
-        {!isGuest && (
-            <div className="mt-4">
-                 <div className="flex justify-between items-center p-4">
-                    <div className="flex items-center space-x-2 cursor-pointer" onClick={() => setIsFriendsExpanded(!isFriendsExpanded)}>
-                        {isFriendsExpanded ? (
-                            <ChevronDownIcon className="w-4 h-4 text-text-secondary" />
-                        ) : (
-                            <ChevronRightIcon className="w-4 h-4 text-text-secondary" />
-                        )}
-                        <h2 className="text-lg font-semibold text-text-primary">
-                            Friends
-                        </h2>
-                    </div>
-                    <button onClick={(e) => { e.stopPropagation(); onAddFriend(); }} className="text-highlight hover:text-teal-400">
-                        <UserPlusIcon className="w-6 h-6"/>
-                    </button>
-                </div>
-                {isFriendsExpanded && (
-                     <ul>
-                        {friends.length === 0 && <p className="px-4 text-sm text-text-secondary">Your friend list is empty.</p>}
-                        {friends.map(friend => (
-                            <li key={friend.id}>
-                                <div className="flex items-center">
-                                <button
-                                        onClick={() => {
-                                            if (currentUser.id) {
-                                                const privateChat = getOrCreatePrivateChat(currentUser.id, friend.id!);
-                                                onSelectPrivateChat(privateChat, friend);
-                                            }
-                                        }}
-                                        className={`flex-1 text-left p-3 flex items-center space-x-3 transition-colors duration-200 ${friend.gender === 'Female' ? 'hover:bg-pink-100/40' : 'hover:bg-accent/60'}`}
-                                        title="Start private chat"
-                                >
-                                    <div className="relative">
-                                    {friend.avatar ? (
-                                        <div className={`w-10 h-10 rounded-full p-0.5 ${friend.gender === 'Female' ? 'bg-pink-300/80 ring-2 ring-pink-400/70' : 'bg-blue-300/80 ring-2 ring-blue-400/70'}`}>
-                                            <img src={friend.avatar} alt={friend.nickname} className="w-full h-full rounded-full object-cover"/>
-                                        </div>
-                                    ) : (
-                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white self-start ${friend.gender === 'Female' ? 'bg-pink-500 ring-2 ring-pink-400/70' : 'bg-blue-500 ring-2 ring-blue-400/70'}`}>
-                                            {friend.nickname.substring(0,2).toUpperCase()}
-                                        </div>
-                                    )}
-                                    <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 border-2 border-secondary"></span>
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className={`font-semibold truncate text-text-primary`}>{friend.nickname}</h3>
-                                        <p className="text-sm text-text-secondary truncate">{`${friend.age}, ${friend.country}`}</p>
-                                    </div>
-                                </button>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onRemoveFriend(friend.id!);
-                                        }}
-                                        className="p-2 text-red-400 hover:text-red-300 hover:bg-red-400/20 rounded-lg transition-colors"
-                                        title="Remove friend"
-                                    >
-                                        <XIcon className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </li>
-                        ))}
-                     </ul>
-                )}
-            </div>
-        )}
-        
 
         {/* Online Users Section - for private chats */}
         <div className="mt-4">
@@ -620,14 +645,12 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
                     </div>
                     <ul>
                             {getOnlineUsersList()
-                                .filter(u => u.id !== currentUser.id)
                                 .filter(user => {
                                     if (genderFilter === 'All') return true;
                                     return user.gender === genderFilter;
                                 })
                                 .length === 0 && <p className="px-4 pt-2 text-sm text-text-secondary">No online users match the filter.</p>}
                             {getOnlineUsersList()
-                                .filter(u => u.id !== currentUser.id)
                                 .filter(user => {
                                     if (genderFilter === 'All') return true;
                                     return user.gender === genderFilter;

@@ -51,14 +51,44 @@ export interface SystemStats {
 
 // 获取用户统计数据
 export const getUserStats = (): UserStats => {
-  const users = JSON.parse(localStorage.getItem('chatsphere_users') || '[]');
+  // 直接从 localStorage 读取最新数据（不使用缓存）
+  const rawUsers = JSON.parse(localStorage.getItem('chatsphere_users') || '[]');
+  
+  // 使用 rawUsers 而不是再处理
+  const users = rawUsers;
+  
+  // 如果没有任何用户，返回空统计数据
+  if (!users || users.length === 0) {
+    return {
+      totalUsers: 0,
+      registeredUsers: 0,
+      guestUsers: 0,
+      activeUsers: 0,
+      newUsersToday: 0,
+      newUsersThisWeek: 0,
+      newUsersThisMonth: 0
+    };
+  }
+  
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
   const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-  const registeredUsers = users.filter((u: User) => u.id && !u.id.startsWith('guest-'));
-  const guestUsers = users.filter((u: User) => u.id && u.id.startsWith('guest-'));
+  // 兼容两种判断方式：1) id 前缀 "guest-", 2) isGuest 字段
+  const registeredUsers = users.filter((u: User) => {
+    if (!u.id) return false;
+    const isGuestById = u.id.startsWith('guest-');
+    const isGuestByField = (u as any).isGuest === true;
+    return !(isGuestById || isGuestByField);
+  });
+  
+  const guestUsers = users.filter((u: User) => {
+    if (!u.id) return false;
+    const isGuestById = u.id.startsWith('guest-');
+    const isGuestByField = (u as any).isGuest === true;
+    return isGuestById || isGuestByField;
+  });
   
   const newUsersToday = users.filter((u: User) => {
     const createdAt = new Date(u.createdAt || now.toISOString());

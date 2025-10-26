@@ -117,9 +117,8 @@ export const getTrafficData = (): TrafficData[] => {
     return JSON.parse(stored);
   }
   
-  const mockData = generateMockTrafficData();
-  localStorage.setItem('chatsphere_traffic_data', JSON.stringify(mockData));
-  return mockData;
+  // 不再自动生成模拟数据，返回空数组
+  return [];
 };
 
 // 记录新的访问

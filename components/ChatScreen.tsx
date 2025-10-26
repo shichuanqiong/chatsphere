@@ -35,6 +35,7 @@ import {
   subscribeToRoomsChanges,
   getRooms
 } from '../services/roomService';
+import { joinRoomPresence, leaveRoomPresence } from '../services/roomPresenceService';
 import { MenuIcon, LogoutIcon, SpinnerIcon } from './icons';
 
 interface ChatScreenProps {
@@ -259,6 +260,16 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ user: initialUser, onLogout }) 
     }
   }, [activeChat]);
 
+  // 清理房间 presence（组件卸载或用户离开时）
+  useEffect(() => {
+    return () => {
+      if (activeChat?.type === 'room' && activeChat.data.id) {
+        const uid = user.id || `guest-${user.nickname}`;
+        leaveRoomPresence(activeChat.data.id, uid);
+      }
+    };
+  }, [activeChat?.data.id, user.id, user.nickname]);
+
   // 恢复最后访问的聊天（不自动选择默认房间）
   useEffect(() => {
     if (!activeChat && rooms.length > 0) {
@@ -317,6 +328,16 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ user: initialUser, onLogout }) 
 
   const handleSelectRoom = (room: ChatRoom) => {
     if (activeChat?.type === 'room' && activeChat.data.id === room.id) return;
+    
+    // 先离开上一个房间的 presence（如果有）
+    if (activeChat?.type === 'room' && activeChat.data.id) {
+      const uid = user.id || `guest-${user.nickname}`;
+      leaveRoomPresence(activeChat.data.id, uid);
+    }
+    
+    // 加入新房间的 presence
+    const uid = user.id || `guest-${user.nickname}`;
+    joinRoomPresence(room.id, uid);
     
     // 对于官方房间，直接设置活跃聊天
     if (room.isOfficial) {

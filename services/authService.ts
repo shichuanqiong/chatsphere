@@ -67,7 +67,7 @@ export const getCurrentUser = (): User | null => {
 };
 
 export const getAllUsers = (): User[] => {
-    return getUsers().filter(u => !!u.id); // Return only registered users
+    return getUsers().filter(u => !!u.id); // Return all users (registered + guest)
 };
 
 export const addFriend = (currentUserId: string, friendId: string): { success: boolean; user?: User, message?: string } => {

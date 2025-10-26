@@ -23,15 +23,17 @@ const RoomMonitoring: React.FC = () => {
     try {
       const allRooms = getAllRoomsForAdmin();
       setRooms(allRooms);
+      // 使用新加载的数据立即过滤
+      filterRooms(allRooms);
+      setIsLoading(false);
     } catch (error) {
       console.error('Failed to load rooms:', error);
-    } finally {
       setIsLoading(false);
     }
   };
 
-  const filterRooms = () => {
-    let filtered = rooms;
+  const filterRooms = (roomList = rooms) => {
+    let filtered = roomList;
 
     // Filter by type
     switch (filterType) {
@@ -158,7 +160,7 @@ const RoomMonitoring: React.FC = () => {
               placeholder="Search rooms by name or host..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 bg-white placeholder-gray-400"
             />
           </div>
           <div className="flex gap-2">

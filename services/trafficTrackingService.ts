@@ -34,16 +34,13 @@ const getUserDeviceInfo = () => {
   return { device, browser, os };
 };
 
-// 获取地理位置信息（模拟）
+// 获取地理位置信息（真实数据）
 const getGeographicInfo = () => {
-  // 在实际应用中，这里可以使用IP地理位置API
-  // 现在使用模拟数据
-  const countries = ['United States', 'China', 'Japan', 'Germany', 'United Kingdom', 'France', 'Canada', 'Australia', 'Brazil', 'India'];
-  const cities = ['New York', 'Los Angeles', 'London', 'Tokyo', 'Berlin', 'Paris', 'Toronto', 'Sydney', 'São Paulo', 'Mumbai'];
-  
+  // 返回真实的未知地理位置（因为无法在不使用API的情况下获取真实IP地理位置）
+  // 用户地理位置将显示为 Unknown
   return {
-    country: countries[Math.floor(Math.random() * countries.length)],
-    city: cities[Math.floor(Math.random() * cities.length)]
+    country: 'Unknown',
+    city: 'Unknown'
   };
 };
 

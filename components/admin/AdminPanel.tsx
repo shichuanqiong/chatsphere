@@ -33,8 +33,38 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ admin, onLogout }) => {
   };
 
   useEffect(() => {
+    // 修复旧数据格式（自动执行一次）
+    const fixGuestFormat = () => {
+      const KEY = 'chatsphere_users';
+      try {
+        let users = JSON.parse(localStorage.getItem(KEY) || '[]');
+        if (!Array.isArray(users)) users = [];
+
+        const fixed = users.map((u: any) => {
+          const isGuestById = typeof u?.id === 'string' && u.id.startsWith('guest-');
+          return {
+            ...u,
+            isGuest: u?.isGuest === true ? true : isGuestById,
+            userType: (u?.isGuest === true || isGuestById) ? 'guest' : 'registered'
+          };
+        });
+
+        localStorage.setItem(KEY, JSON.stringify(fixed));
+      } catch (error) {
+        console.error('Failed to fix format:', error);
+      }
+    };
+    
+    // 只在首次加载时执行一次
+    if (!sessionStorage.getItem('guest_format_fixed')) {
+      fixGuestFormat();
+      sessionStorage.setItem('guest_format_fixed', 'true');
+    }
+    
+    // 立即加载一次
     loadStats();
-    const interval = setInterval(loadStats, 30000); // Refresh every 30 seconds
+    // 每5秒刷新一次（更快地看到更新）
+    const interval = setInterval(loadStats, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -50,8 +80,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ admin, onLogout }) => {
                   <h1 className="text-2xl font-bold mb-2">Welcome back, {admin.username}!</h1>
                   <p className="text-purple-100">Manage your ChatSphere community with powerful admin tools</p>
                 </div>
-                <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center">
-                  <span className="text-3xl">👑</span>
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={loadStats}
+                    className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2"
+                  >
+                    <span>🔄</span>
+                    <span>Refresh</span>
+                  </button>
+                  <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center">
+                    <span className="text-3xl">👑</span>
+                  </div>
                 </div>
               </div>
             </div>
