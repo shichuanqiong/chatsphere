@@ -60,6 +60,9 @@ const App: React.FC = () => {
       friends: []
     };
     
+    // 保存Guest用户到localStorage，使其刷新后不会退出
+    localStorage.setItem('chatsphere_current_user', JSON.stringify(guestUser));
+    
     // 清理过期房间
     import('./services/roomService').then(({ cleanupExpiredRooms }) => {
       cleanupExpiredRooms();

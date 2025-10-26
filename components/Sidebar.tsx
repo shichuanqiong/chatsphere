@@ -202,6 +202,7 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
   const [isUsersExpanded, setIsUsersExpanded] = useState(true);
   const [isMyRoomsExpanded, setIsMyRoomsExpanded] = useState(true);
   const [isUserRoomsExpanded, setIsUserRoomsExpanded] = useState(true);
+  const [isOfficialRoomsExpanded, setIsOfficialRoomsExpanded] = useState(true);
   const [genderFilter, setGenderFilter] = useState<'All' | 'Male' | 'Female'>('All');
   
   // Get online users (users who are currently in any room)
@@ -284,9 +285,17 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
         
         {/* Official Rooms */}
         <div>
-            <div className="px-4 pb-2">
-                <h3 className="text-sm font-semibold text-text-primary">Official Rooms</h3>
-                    </div>
+            <div className="flex justify-between items-center px-4 pb-2 cursor-pointer" onClick={() => setIsOfficialRoomsExpanded(!isOfficialRoomsExpanded)}>
+                <div className="flex items-center space-x-2">
+                    {isOfficialRoomsExpanded ? (
+                        <ChevronDownIcon className="w-4 h-4 text-text-secondary" />
+                    ) : (
+                        <ChevronRightIcon className="w-4 h-4 text-text-secondary" />
+                    )}
+                    <h3 className="text-sm font-semibold text-text-primary">Official Rooms</h3>
+                </div>
+            </div>
+                    {isOfficialRoomsExpanded && (
                     <ul>
                 {rooms.filter(room => room.isOfficial).map(room => {
                             const isClickable = !isGuest || room.isOfficial;
@@ -318,7 +327,8 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
                         </li>
                     );
                 })}
-            </ul>
+                    </ul>
+                    )}
         </div>
 
         {/* My Rooms - Only for registered users */}
