@@ -331,7 +331,7 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
                         ) : (
                             <ChevronRightIcon className="w-4 h-4 text-text-secondary" />
                         )}
-                        <h3 className="text-sm font-semibold text-text-primary">
+                        <h3 className="text-lg font-semibold text-text-primary">
                             My Rooms
                         </h3>
                     </div>
