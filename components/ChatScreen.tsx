@@ -94,8 +94,8 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ user: initialUser, onLogout }) 
     
     loadRooms();
     
-    // 每分钟检查一次过期房间和消息
-    const interval = setInterval(loadRooms, 60000);
+    // 每5秒更新一次房间列表，使在线用户和新建房间能够实时显示
+    const interval = setInterval(loadRooms, 5000);
     return () => clearInterval(interval);
   }, [isGuest, user.id]);
 
