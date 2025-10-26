@@ -208,25 +208,22 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
   // Get online users list (users currently in any room)
   const getOnlineUsersList = () => {
     try {
-      const allUsers = getAllUsers();
-      // Safety check: ensure allUsers is an array
-      if (!Array.isArray(allUsers)) {
-        console.error('getAllUsers returned non-array:', allUsers);
-        return [];
-      }
-      
       // Get all users who are currently in any room
       const onlineUserIds = new Set<string>();
+      const onlineUsersMap = new Map<string, User>();
+      
+      // Collect users from room participants
       rooms.forEach(room => {
         room.participants.forEach(participant => {
-          if (participant.id) {
+          if (participant.id && !onlineUserIds.has(participant.id)) {
             onlineUserIds.add(participant.id);
+            onlineUsersMap.set(participant.id, participant as User);
           }
         });
       });
       
-      // Return array of users who are in rooms
-      return allUsers.filter(user => onlineUserIds.has(user.id!));
+      // Return array of users who are actually in rooms (not from localStorage)
+      return Array.from(onlineUsersMap.values());
     } catch (error) {
       console.error('Error getting online users list:', error);
       return [];
