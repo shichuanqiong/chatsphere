@@ -63,8 +63,6 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ user: initialUser, onLogout }) 
   const [lastActivity, setLastActivity] = useState<number>(Date.now());
 
   const isGuest = user.id?.startsWith('guest-') || false;
-  
-  const allRooms = rooms;
 
   // 加载房间数据
   useEffect(() => {
@@ -522,7 +520,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ user: initialUser, onLogout }) 
       <div className="flex flex-1 overflow-hidden">
         <aside className={`transition-transform duration-300 ease-in-out md:translate-x-0 ${isSidebarVisible ? 'translate-x-0' : '-translate-x-full'} absolute md:static z-10 h-full`}>
             <Sidebar
-              rooms={allRooms}
+              rooms={rooms}
               friends={friends}
               onSelectRoom={handleSelectRoom}
                   onSelectPrivateChat={handleSelectPrivateChat}
