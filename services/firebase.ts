@@ -10,7 +10,9 @@ const firebaseConfig = {
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "chatsphere-28c89",
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "chatsphere-28c89.firebasestorage.app",
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "918885541055",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:918885541055:web:54a48c173c4b81f219520a"
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:918885541055:web:54a48c173c4b81f219520a",
+  // 明确指定 Realtime Database URL
+  databaseURL: "https://chatsphere-28c89-default-rtdb.firebaseio.com"
 };
 
 // 初始化Firebase
