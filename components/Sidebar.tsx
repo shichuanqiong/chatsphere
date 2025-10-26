@@ -614,9 +614,9 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
                                 })
                                 .map(user => {
                                     const isFriend = !isGuest && friends.some(f => f.id === user.id);
-                            return (
+                                    return (
                                         <li key={user.id}>
-                                <button
+                            <div
                                                 onClick={() => {
                                                     // All users can chat with each other
                                                     const currentUserId = currentUser.id || `guest-${currentUser.nickname}`;
@@ -624,7 +624,7 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
                                                     const privateChat = getOrCreatePrivateChat(currentUserId, targetUserId);
                                                     onSelectPrivateChat(privateChat, user);
                                                 }}
-                                                className={`w-full text-left p-3 flex items-center space-x-3 transition-colors duration-200 ${user.gender === 'Female' ? 'hover:bg-pink-100/40' : 'hover:bg-accent/60'}`}
+                                                className={`w-full text-left p-3 flex items-center space-x-3 transition-colors duration-200 cursor-pointer ${user.gender === 'Female' ? 'hover:bg-pink-100/40' : 'hover:bg-accent/60'}`}
                                                 title="Start private chat"
                                 >
                                     <div className="relative">
@@ -669,7 +669,7 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
                                         </div>
                                                     <p className="text-sm text-text-secondary truncate">{`${user.age}, ${user.gender} • ${user.country}`}</p>
                                     </div>
-                                </button>
+                            </div>
                                 </li>
                                     );
                         })}
