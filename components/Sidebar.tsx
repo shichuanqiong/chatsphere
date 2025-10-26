@@ -205,24 +205,14 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
   const [isOfficialRoomsExpanded, setIsOfficialRoomsExpanded] = useState(true);
   const [genderFilter, setGenderFilter] = useState<'All' | 'Male' | 'Female'>('All');
   
-  // Get online users (users who are currently in any room)
+  // Get online users (all logged-in users, not just those in rooms)
   const getOnlineUsers = () => {
-    const onlineUserIds = new Set<string>();
+    const allUsers = getAllUsers();
+    // Count all registered users + current guest (if guest)
+    // This counts ALL logged-in users on the site, not just those in rooms
+    const guestId = currentUser.id ? undefined : `guest-${currentUser.nickname}`;
     
-    // Collect all unique user IDs from room participants
-    rooms.forEach(room => {
-      room.participants.forEach(participant => {
-        if (participant.id) {
-          // Registered user
-          onlineUserIds.add(participant.id);
-        } else if (participant.nickname) {
-          // Guest user - use nickname as unique identifier
-          onlineUserIds.add(`guest-${participant.nickname}`);
-        }
-      });
-    });
-    
-    return Array.from(onlineUserIds);
+    return allUsers.length + (guestId ? 1 : 0);
   };
 
 
@@ -245,7 +235,7 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
             <div className="flex items-center justify-center space-x-2">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                 <p className="text-sm font-semibold text-text-primary">
-                    {getOnlineUsers().length} Online
+                    {getOnlineUsers()} Online
                 </p>
             </div>
             <p className="text-xs text-text-secondary mt-1">
