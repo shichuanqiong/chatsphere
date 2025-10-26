@@ -279,7 +279,7 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
                 </p>
             </div>
             <p className="text-xs text-text-secondary mt-1">
-                {rooms.length} active rooms
+                {rooms.filter(room => !room.isOfficial).length} user rooms
             </p>
         </div>
         
@@ -437,15 +437,16 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
             {isUserRoomsExpanded && (
                 <ul>
                     {rooms.filter(room => {
-                        // 过滤官方房间和当前用户创建的房间
-                        if (room.isOfficial || room.hostId === currentUser.id) return false;
+                        // 只过滤官方房间
+                        if (room.isOfficial) return false;
                         
-                        // 对于私有房间，检查用户是否被邀请
+                        // 对于私有房间，检查用户是否被邀请（包括房主）
                         if (room.roomType === 'private') {
-                            return room.invitedUsers?.includes(currentUser.id!) || false;
+                            // 房主可以看到自己的私有房间
+                            return room.hostId === currentUser.id || (room.invitedUsers?.includes(currentUser.id!) || false);
                         }
                         
-                        // 公开房间所有人都可以看到
+                        // 公开房间所有人都可以看到（包括自己创建的）
                         return true;
                     }).sort((a, b) => {
                         // 按创建时间排序，最新的在上面
