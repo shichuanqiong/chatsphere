@@ -205,21 +205,46 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
   const [isOfficialRoomsExpanded, setIsOfficialRoomsExpanded] = useState(true);
   const [genderFilter, setGenderFilter] = useState<'All' | 'Male' | 'Female'>('All');
   
-  // Get online users (all logged-in users, not just those in rooms)
-  const getOnlineUsers = () => {
+  // Get online users list (users currently in any room)
+  const getOnlineUsersList = () => {
     try {
       const allUsers = getAllUsers();
       // Safety check: ensure allUsers is an array
       if (!Array.isArray(allUsers)) {
         console.error('getAllUsers returned non-array:', allUsers);
-        return 0;
+        return [];
+      }
+      
+      // Get all users who are currently in any room
+      const onlineUserIds = new Set<string>();
+      rooms.forEach(room => {
+        room.participants.forEach(participant => {
+          if (participant.id) {
+            onlineUserIds.add(participant.id);
+          }
+        });
+      });
+      
+      // Return array of users who are in rooms
+      return allUsers.filter(user => onlineUserIds.has(user.id!));
+    } catch (error) {
+      console.error('Error getting online users list:', error);
+      return [];
+    }
+  };
+
+  // Get online count (all logged-in users on the site)
+  const getOnlineCount = () => {
+    try {
+      const allUsers = getAllUsers();
+      if (!Array.isArray(allUsers)) {
+        return 1; // At least the current user
       }
       // Count all registered users + current guest (if guest)
-      // This counts ALL logged-in users on the site, not just those in rooms
       const isGuest = !currentUser.id;
       return allUsers.length + (isGuest ? 1 : 0);
     } catch (error) {
-      console.error('Error getting online users:', error);
+      console.error('Error getting online count:', error);
       return 0;
     }
   };
@@ -244,7 +269,7 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
             <div className="flex items-center justify-center space-x-2">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                 <p className="text-sm font-semibold text-text-primary">
-                    {getOnlineUsers()} Online
+                    {getOnlineCount()} Online
                 </p>
             </div>
             <p className="text-xs text-text-secondary mt-1">
@@ -541,7 +566,7 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
                     <h2 className="text-lg font-semibold text-text-primary">Online Users</h2>
                 </div>
                 <p className="text-sm text-text-secondary">
-                    ({getOnlineUsers().filter(u => u.id !== currentUser.id && (!isGuest || !friends.some(f => f.id === u.id))).length} online)
+                    ({getOnlineUsersList().filter(u => u.id !== currentUser.id).length} online)
                 </p>
             </div>
                 {isUsersExpanded && (
@@ -568,15 +593,15 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
                         </button>
                     </div>
                     <ul>
-                            {getOnlineUsers()
-                                .filter(u => u.id !== currentUser.id && (!isGuest || !friends.some(f => f.id === u.id)))
+                            {getOnlineUsersList()
+                                .filter(u => u.id !== currentUser.id)
                                 .filter(user => {
                                     if (genderFilter === 'All') return true;
                                     return user.gender === genderFilter;
                                 })
                                 .length === 0 && <p className="px-4 pt-2 text-sm text-text-secondary">No online users match the filter.</p>}
-                            {getOnlineUsers()
-                                .filter(u => u.id !== currentUser.id && (!isGuest || !friends.some(f => f.id === u.id)))
+                            {getOnlineUsersList()
+                                .filter(u => u.id !== currentUser.id)
                                 .filter(user => {
                                     if (genderFilter === 'All') return true;
                                     return user.gender === genderFilter;
