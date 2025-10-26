@@ -124,7 +124,7 @@ export const updateRoom = (roomId: string, updates: Partial<ChatRoom>): boolean 
 };
 
 // 添加消息到房间
-export const addMessageToRoom = (roomId: string, message: any): boolean => {
+export const addMessageToRoom = async (roomId: string, message: any): Promise<boolean> => {
   const rooms = getRooms();
   const roomIndex = rooms.findIndex(r => r.id === roomId);
   
@@ -132,6 +132,18 @@ export const addMessageToRoom = (roomId: string, message: any): boolean => {
   
   rooms[roomIndex].messages.push(message);
   saveRooms(rooms);
+  
+  // 同步到 Firebase Firestore
+  try {
+    const roomRef = doc(db, 'rooms', roomId);
+    await updateDoc(roomRef, {
+      messages: rooms[roomIndex].messages
+    });
+    console.log('✅ Message synced to Firestore:', roomId);
+  } catch (error) {
+    console.error('❌ Failed to sync message to Firestore:', error);
+  }
+  
   return true;
 };
 

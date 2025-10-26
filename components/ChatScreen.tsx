@@ -535,7 +535,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ user: initialUser, onLogout }) 
         if (room.isOfficial) {
           addOfficialRoomMessage(room.id, userMessage);
         } else {
-          addMessageToRoom(room.id, userMessage);
+          await addMessageToRoom(room.id, userMessage);
         }
 
         setActiveChat({ type: 'room', data: updatedRoom });
