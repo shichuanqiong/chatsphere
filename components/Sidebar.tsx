@@ -233,16 +233,31 @@ const Sidebar: React.FC<SidebarProps> = ({ rooms, friends, onSelectRoom, onSelec
     }
   };
 
-  // Get online count (all logged-in users on the site)
+  // Get online count (users currently in any room)
   const getOnlineCount = () => {
     try {
-      const allUsers = getAllUsers();
-      if (!Array.isArray(allUsers)) {
-        return 1; // At least the current user
+      // Count unique users who are currently in any room
+      const onlineUserIds = new Set<string>();
+      
+      // Add current user
+      if (currentUser.id) {
+        onlineUserIds.add(currentUser.id);
+      } else if (currentUser.nickname) {
+        onlineUserIds.add(`guest-${currentUser.nickname}`);
       }
-      // Count all registered users + current guest (if guest)
-      const isGuest = !currentUser.id;
-      return allUsers.length + (isGuest ? 1 : 0);
+      
+      // Add all users who are in rooms
+      rooms.forEach(room => {
+        room.participants.forEach(participant => {
+          if (participant.id) {
+            onlineUserIds.add(participant.id);
+          } else if (participant.nickname) {
+            onlineUserIds.add(`guest-${participant.nickname}`);
+          }
+        });
+      });
+      
+      return onlineUserIds.size;
     } catch (error) {
       console.error('Error getting online count:', error);
       return 0;
