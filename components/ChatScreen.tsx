@@ -129,16 +129,21 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ user: initialUser, onLogout }) 
   // Firestore 实时同步房间数据
   useEffect(() => {
     // 首次加载时同步 Firestore 数据
-    syncRoomsFromFirestore().then(syncedRooms => {
+    const loadAndSetRooms = async () => {
+      const userRooms = await syncRoomsFromFirestore();
       const officialRoomsWithMessages = OFFICIAL_ROOMS.map(room => getOfficialRoomWithMessages(room));
-      const allRooms = getAllActiveRooms(officialRoomsWithMessages);
+      const allRooms = [...officialRoomsWithMessages, ...userRooms];
+      console.log('Setting rooms:', allRooms);
       setRooms(allRooms);
-    });
+    };
+
+    loadAndSetRooms();
 
     // 订阅房间变化（实时同步）
-    const unsubscribe = subscribeToRoomsChanges((syncedRooms) => {
+    const unsubscribe = subscribeToRoomsChanges((firestoreRooms) => {
       const officialRoomsWithMessages = OFFICIAL_ROOMS.map(room => getOfficialRoomWithMessages(room));
-      const allRooms = getAllActiveRooms(officialRoomsWithMessages);
+      const allRooms = [...officialRoomsWithMessages, ...firestoreRooms];
+      console.log('Rooms changed in Firestore:', allRooms);
       setRooms(allRooms);
     });
 
